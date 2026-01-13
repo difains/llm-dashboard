@@ -46,7 +46,7 @@ export function ModelUsageChart({ title = '모델별 사용량' }: ModelUsageCha
                                 borderRadius: '8px',
                                 color: '#f9fafb',
                             }}
-                            formatter={(value: number) => [`${(value / 1000000).toFixed(2)}M 토큰`, '사용량']}
+                            formatter={(value) => [`${(Number(value) / 1000000).toFixed(2)}M 토큰`, '사용량']}
                         />
                         <Bar
                             dataKey="tokens"

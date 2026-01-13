@@ -68,9 +68,9 @@ export function UsageChart({ title = '일별 사용량 추이' }: UsageChartProp
                                 color: '#f9fafb',
                             }}
                             labelStyle={{ color: '#9ca3af' }}
-                            formatter={(value: number, name: string) => [
-                                name === 'tokens' ? `${(value / 1000).toFixed(1)}K 토큰` : `$${value.toFixed(2)}`,
-                                name === 'tokens' ? '토큰 사용량' : '비용'
+                            formatter={(value) => [
+                                `${(Number(value) / 1000).toFixed(1)}K 토큰`,
+                                '토큰 사용량'
                             ]}
                         />
                         <Area

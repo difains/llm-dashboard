@@ -44,7 +44,7 @@ export function ProviderDistribution({ title = '서비스별 사용 비율' }: P
                                     borderRadius: '8px',
                                     color: '#f9fafb',
                                 }}
-                                formatter={(value: number) => [`${value}%`, '사용 비율']}
+                                formatter={(value) => [`${value}%`, '사용 비율']}
                             />
                         </PieChart>
                     </ResponsiveContainer>

@@ -48,8 +48,8 @@ export default function AnalyticsPage() {
                             key={range}
                             onClick={() => setDateRange(range)}
                             className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${dateRange === range
-                                    ? 'bg-indigo-500 text-white'
-                                    : 'text-gray-400 hover:text-white'
+                                ? 'bg-indigo-500 text-white'
+                                : 'text-gray-400 hover:text-white'
                                 }`}
                         >
                             {range === '24h' ? '24시간' : range === '7d' ? '7일' : range === '30d' ? '30일' : '90일'}
@@ -115,7 +115,7 @@ export default function AnalyticsPage() {
                             <YAxis stroke="#6b7280" tick={{ fill: '#9ca3af', fontSize: 12 }} tickFormatter={(v) => `${(v / 1000).toFixed(0)}K`} />
                             <Tooltip
                                 contentStyle={{ backgroundColor: '#1f2937', border: '1px solid #374151', borderRadius: '8px' }}
-                                formatter={(value: number, name: string) => [`${(value / 1000).toFixed(1)}K`, name]}
+                                formatter={(value) => [`${(Number(value) / 1000).toFixed(1)}K`, '']}
                             />
                             <Legend />
                             <Area type="monotone" dataKey="openai" name="OpenAI" stroke="#22c55e" fill="url(#openaiGrad)" />
