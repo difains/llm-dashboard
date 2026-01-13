@@ -1,73 +1,61 @@
 'use client';
 
-import {
-    AreaChart,
-    Area,
-    XAxis,
-    YAxis,
-    CartesianGrid,
-    Tooltip,
-    ResponsiveContainer,
-} from 'recharts';
-
-const mockData = [
-    { date: '1/1', tokens: 120000, cost: 2.4 },
-    { date: '1/2', tokens: 180000, cost: 3.6 },
-    { date: '1/3', tokens: 150000, cost: 3.0 },
-    { date: '1/4', tokens: 220000, cost: 4.4 },
-    { date: '1/5', tokens: 280000, cost: 5.6 },
-    { date: '1/6', tokens: 250000, cost: 5.0 },
-    { date: '1/7', tokens: 310000, cost: 6.2 },
-    { date: '1/8', tokens: 290000, cost: 5.8 },
-    { date: '1/9', tokens: 350000, cost: 7.0 },
-    { date: '1/10', tokens: 420000, cost: 8.4 },
-    { date: '1/11', tokens: 380000, cost: 7.6 },
-    { date: '1/12', tokens: 450000, cost: 9.0 },
-    { date: '1/13', tokens: 520000, cost: 10.4 },
-];
+import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
 interface UsageChartProps {
-    title?: string;
+    title: string;
+    data?: { name: string; tokens: number; cost: number }[];
 }
 
-export function UsageChart({ title = '일별 사용량 추이' }: UsageChartProps) {
+export function UsageChart({ title, data }: UsageChartProps) {
+    if (!data || data.length === 0) {
+        return (
+            <div className="card h-[400px] flex items-center justify-center">
+                <p className="text-gray-500">데이터가 없습니다</p>
+            </div>
+        );
+    }
+
     return (
-        <div className="card">
+        <div className="card animate-fade-in-up">
             <h3 className="text-lg font-semibold text-white mb-6">{title}</h3>
-            <div className="h-80">
+            <div className="h-[300px] w-full">
                 <ResponsiveContainer width="100%" height="100%">
-                    <AreaChart data={mockData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
+                    <AreaChart data={data}>
                         <defs>
-                            <linearGradient id="tokenGradient" x1="0" y1="0" x2="0" y2="1">
+                            <linearGradient id="colorTokens" x1="0" y1="0" x2="0" y2="1">
                                 <stop offset="5%" stopColor="#6366f1" stopOpacity={0.3} />
                                 <stop offset="95%" stopColor="#6366f1" stopOpacity={0} />
                             </linearGradient>
-                            <linearGradient id="costGradient" x1="0" y1="0" x2="0" y2="1">
-                                <stop offset="5%" stopColor="#8b5cf6" stopOpacity={0.3} />
-                                <stop offset="95%" stopColor="#8b5cf6" stopOpacity={0} />
+                            <linearGradient id="colorCost" x1="0" y1="0" x2="0" y2="1">
+                                <stop offset="5%" stopColor="#22c55e" stopOpacity={0.3} />
+                                <stop offset="95%" stopColor="#22c55e" stopOpacity={0} />
                             </linearGradient>
                         </defs>
-                        <CartesianGrid strokeDasharray="3 3" stroke="#374151" vertical={false} />
+                        <CartesianGrid strokeDasharray="3 3" stroke="#1f2937" vertical={false} />
                         <XAxis
-                            dataKey="date"
-                            stroke="#6b7280"
-                            tick={{ fill: '#9ca3af', fontSize: 12 }}
-                            axisLine={{ stroke: '#374151' }}
+                            dataKey="name"
+                            stroke="#9ca3af"
+                            tick={{ fill: '#9ca3af' }}
+                            axisLine={false}
+                            tickLine={false}
+                            tickMargin={10}
                         />
                         <YAxis
-                            stroke="#6b7280"
-                            tick={{ fill: '#9ca3af', fontSize: 12 }}
-                            axisLine={{ stroke: '#374151' }}
-                            tickFormatter={(value) => `${(value / 1000).toFixed(0)}K`}
+                            stroke="#9ca3af"
+                            tick={{ fill: '#9ca3af' }}
+                            axisLine={false}
+                            tickLine={false}
+                            tickFormatter={(value) => `${value / 1000}K`}
                         />
                         <Tooltip
                             contentStyle={{
-                                backgroundColor: '#1f2937',
-                                border: '1px solid #374151',
-                                borderRadius: '8px',
-                                color: '#f9fafb',
+                                backgroundColor: '#111827',
+                                borderColor: '#374151',
+                                borderRadius: '0.5rem',
+                                color: '#f3f4f6'
                             }}
-                            labelStyle={{ color: '#9ca3af' }}
+                            itemStyle={{ color: '#e5e7eb' }}
                             formatter={(value) => [
                                 `${(Number(value) / 1000).toFixed(1)}K 토큰`,
                                 '토큰 사용량'
@@ -79,7 +67,7 @@ export function UsageChart({ title = '일별 사용량 추이' }: UsageChartProp
                             stroke="#6366f1"
                             strokeWidth={2}
                             fillOpacity={1}
-                            fill="url(#tokenGradient)"
+                            fill="url(#colorTokens)"
                         />
                     </AreaChart>
                 </ResponsiveContainer>

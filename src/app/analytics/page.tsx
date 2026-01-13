@@ -1,165 +1,124 @@
 'use client';
 
 import { useState } from 'react';
-import {
-    AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
-    BarChart, Bar, Legend
-} from 'recharts';
-import { Calendar, TrendingUp, DollarSign, Clock } from 'lucide-react';
-
-const dailyData = [
-    { date: '1/1', openai: 80000, anthropic: 45000, google: 25000 },
-    { date: '1/2', openai: 120000, anthropic: 55000, google: 30000 },
-    { date: '1/3', openai: 95000, anthropic: 60000, google: 28000 },
-    { date: '1/4', openai: 140000, anthropic: 70000, google: 35000 },
-    { date: '1/5', openai: 180000, anthropic: 85000, google: 42000 },
-    { date: '1/6', openai: 160000, anthropic: 75000, google: 38000 },
-    { date: '1/7', openai: 200000, anthropic: 95000, google: 50000 },
-];
-
-const hourlyData = Array.from({ length: 24 }, (_, i) => ({
-    hour: `${i}시`,
-    requests: Math.floor(Math.random() * 500) + 100,
-    tokens: Math.floor(Math.random() * 50000) + 10000,
-}));
-
-const modelData = [
-    { model: 'GPT-5.2', input: 800000, output: 400000, cost: 15.40 },
-    { model: 'GPT-5 mini', input: 300000, output: 180000, cost: 0.85 },
-    { model: 'Claude Sonnet 4.5', input: 450000, output: 220000, cost: 4.65 },
-    { model: 'Claude Haiku 4.5', input: 200000, output: 120000, cost: 0.80 },
-    { model: 'Gemini 3 Pro', input: 350000, output: 150000, cost: 2.50 },
-];
+import { Calendar, Filter, Download } from 'lucide-react';
+import { UsageChart } from '@/components/dashboard/UsageChart';
+import { ModelUsageChart } from '@/components/dashboard/ModelUsageChart';
+import { useAppContext } from '@/context/AppContext';
+import Link from 'next/link';
 
 export default function AnalyticsPage() {
+    const { apiKeys, dashboardData } = useAppContext();
     const [dateRange, setDateRange] = useState('7d');
+
+    if (apiKeys.length === 0) {
+        return (
+            <div className="flex flex-col items-center justify-center min-h-[60vh] text-center animate-fade-in">
+                <h2 className="text-2xl font-bold text-white mb-2">데이터가 없습니다</h2>
+                <p className="text-gray-400 mb-6">
+                    상세 분석을 보려면 API 키를 먼저 등록해주세요.
+                </p>
+                <Link href="/keys" className="btn-primary">
+                    API 키 등록하러 가기
+                </Link>
+            </div>
+        );
+    }
 
     return (
         <div className="space-y-8 animate-fade-in">
-            {/* Header */}
-            <div className="flex items-center justify-between">
+            {/* Header Controls */}
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                 <div>
                     <h1 className="text-3xl font-bold text-white mb-2">상세 분석</h1>
-                    <p className="text-gray-400">기간별, 모델별 사용량을 상세히 분석합니다</p>
+                    <p className="text-gray-400">모델별, 서비스별 심층 분석 데이터</p>
                 </div>
-                <div className="flex items-center gap-2 bg-gray-800 rounded-lg p-1">
-                    {['24h', '7d', '30d', '90d'].map((range) => (
-                        <button
-                            key={range}
-                            onClick={() => setDateRange(range)}
-                            className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${dateRange === range
-                                ? 'bg-indigo-500 text-white'
-                                : 'text-gray-400 hover:text-white'
-                                }`}
-                        >
-                            {range === '24h' ? '24시간' : range === '7d' ? '7일' : range === '30d' ? '30일' : '90일'}
-                        </button>
-                    ))}
+
+                <div className="flex gap-3">
+                    <div className="flex bg-gray-900 rounded-lg p-1 border border-gray-800">
+                        {['24h', '7d', '30d'].map((range) => (
+                            <button
+                                key={range}
+                                onClick={() => setDateRange(range)}
+                                className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${dateRange === range
+                                        ? 'bg-indigo-500/20 text-indigo-400 shadow-sm'
+                                        : 'text-gray-400 hover:text-white'
+                                    }`}
+                            >
+                                {range === '24h' ? '24시간' : range === '7d' ? '7일' : '30일'}
+                            </button>
+                        ))}
+                    </div>
+
+                    <button className="btn-secondary flex items-center gap-2">
+                        <Calendar className="w-4 h-4" />
+                        <span>날짜 선택</span>
+                    </button>
+
+                    <button className="btn-secondary flex items-center gap-2">
+                        <Filter className="w-4 h-4" />
+                        <span>필터</span>
+                    </button>
+
+                    <button className="btn-secondary flex items-center gap-2 text-indigo-400 border-indigo-500/30 hover:bg-indigo-500/10">
+                        <Download className="w-4 h-4" />
+                        <span>내보내기</span>
+                    </button>
                 </div>
             </div>
 
-            {/* Summary Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                <div className="card">
-                    <div className="flex items-center gap-3 mb-2">
-                        <Calendar className="w-5 h-5 text-indigo-400" />
-                        <span className="text-gray-400">기간</span>
+            {/* Main Charts */}
+            <UsageChart
+                title="통합 토큰 사용량 추이"
+                data={dashboardData.usageHistory}
+            />
+
+            {/* Analysis Grid */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                {/* Cost Analysis - Reusing ModelUsageChart for demo */}
+                <div className="card h-[400px]">
+                    <h3 className="text-lg font-semibold text-white mb-6">비용 효율성 분석</h3>
+                    <div className="h-[300px] w-full flex items-center justify-center text-gray-500">
+                        <p>비용 분석 차트 (활성화된 키 데이터 기반)</p>
                     </div>
-                    <p className="text-xl font-bold text-white">2026.01.07 - 01.13</p>
                 </div>
-                <div className="card">
-                    <div className="flex items-center gap-3 mb-2">
-                        <TrendingUp className="w-5 h-5 text-green-400" />
-                        <span className="text-gray-400">총 요청</span>
-                    </div>
-                    <p className="text-xl font-bold text-white">87,245</p>
-                </div>
-                <div className="card">
-                    <div className="flex items-center gap-3 mb-2">
-                        <Clock className="w-5 h-5 text-purple-400" />
-                        <span className="text-gray-400">총 토큰</span>
-                    </div>
-                    <p className="text-xl font-bold text-white">24.7M</p>
-                </div>
-                <div className="card">
-                    <div className="flex items-center gap-3 mb-2">
-                        <DollarSign className="w-5 h-5 text-amber-400" />
-                        <span className="text-gray-400">총 비용</span>
-                    </div>
-                    <p className="text-xl font-bold text-white">$892.45</p>
-                </div>
+
+                <ModelUsageChart data={dashboardData.modelUsage} />
             </div>
 
-            {/* Provider Comparison Chart */}
-            <div className="card">
-                <h3 className="text-lg font-semibold text-white mb-6">서비스별 일별 사용량</h3>
-                <div className="h-80">
-                    <ResponsiveContainer width="100%" height="100%">
-                        <AreaChart data={dailyData}>
-                            <defs>
-                                <linearGradient id="openaiGrad" x1="0" y1="0" x2="0" y2="1">
-                                    <stop offset="5%" stopColor="#22c55e" stopOpacity={0.3} />
-                                    <stop offset="95%" stopColor="#22c55e" stopOpacity={0} />
-                                </linearGradient>
-                                <linearGradient id="anthropicGrad" x1="0" y1="0" x2="0" y2="1">
-                                    <stop offset="5%" stopColor="#f59e0b" stopOpacity={0.3} />
-                                    <stop offset="95%" stopColor="#f59e0b" stopOpacity={0} />
-                                </linearGradient>
-                                <linearGradient id="googleGrad" x1="0" y1="0" x2="0" y2="1">
-                                    <stop offset="5%" stopColor="#6366f1" stopOpacity={0.3} />
-                                    <stop offset="95%" stopColor="#6366f1" stopOpacity={0} />
-                                </linearGradient>
-                            </defs>
-                            <CartesianGrid strokeDasharray="3 3" stroke="#374151" vertical={false} />
-                            <XAxis dataKey="date" stroke="#6b7280" tick={{ fill: '#9ca3af', fontSize: 12 }} />
-                            <YAxis stroke="#6b7280" tick={{ fill: '#9ca3af', fontSize: 12 }} tickFormatter={(v) => `${(v / 1000).toFixed(0)}K`} />
-                            <Tooltip
-                                contentStyle={{ backgroundColor: '#1f2937', border: '1px solid #374151', borderRadius: '8px' }}
-                                formatter={(value) => [`${(Number(value) / 1000).toFixed(1)}K`, '']}
-                            />
-                            <Legend />
-                            <Area type="monotone" dataKey="openai" name="OpenAI" stroke="#22c55e" fill="url(#openaiGrad)" />
-                            <Area type="monotone" dataKey="anthropic" name="Anthropic" stroke="#f59e0b" fill="url(#anthropicGrad)" />
-                            <Area type="monotone" dataKey="google" name="Google AI" stroke="#6366f1" fill="url(#googleGrad)" />
-                        </AreaChart>
-                    </ResponsiveContainer>
+            {/* Detailed Table */}
+            <div className="card overflow-hidden">
+                <div className="flex items-center justify-between mb-6">
+                    <h3 className="text-lg font-semibold text-white">모델별 상세 지표</h3>
                 </div>
-            </div>
-
-            {/* Model Breakdown Table */}
-            <div className="card">
-                <h3 className="text-lg font-semibold text-white mb-6">모델별 상세 사용량</h3>
                 <div className="overflow-x-auto">
-                    <table className="w-full">
+                    <table className="w-full text-left border-collapse">
                         <thead>
-                            <tr className="border-b border-gray-700">
-                                <th className="text-left py-3 px-4 text-gray-400 font-medium">모델</th>
-                                <th className="text-right py-3 px-4 text-gray-400 font-medium">Input 토큰</th>
-                                <th className="text-right py-3 px-4 text-gray-400 font-medium">Output 토큰</th>
-                                <th className="text-right py-3 px-4 text-gray-400 font-medium">총 토큰</th>
-                                <th className="text-right py-3 px-4 text-gray-400 font-medium">비용</th>
+                            <tr className="border-b border-gray-800 text-gray-400 text-sm">
+                                <th className="py-3 px-4">모델명</th>
+                                <th className="py-3 px-4">제공사</th>
+                                <th className="py-3 px-4 text-right">총 요청</th>
+                                <th className="py-3 px-4 text-right">평균 토큰</th>
+                                <th className="py-3 px-4 text-right">비용 ($)</th>
                             </tr>
                         </thead>
-                        <tbody>
-                            {modelData.map((row) => (
-                                <tr key={row.model} className="border-b border-gray-800 hover:bg-gray-800/50 transition-colors">
-                                    <td className="py-4 px-4 text-white font-medium">{row.model}</td>
-                                    <td className="py-4 px-4 text-right text-gray-300">{(row.input / 1000).toFixed(1)}K</td>
-                                    <td className="py-4 px-4 text-right text-gray-300">{(row.output / 1000).toFixed(1)}K</td>
-                                    <td className="py-4 px-4 text-right text-gray-300">{((row.input + row.output) / 1000).toFixed(1)}K</td>
-                                    <td className="py-4 px-4 text-right text-green-400 font-semibold">${row.cost.toFixed(2)}</td>
+                        <tbody className="text-sm text-gray-300">
+                            {dashboardData.modelUsage.map((model, idx) => (
+                                <tr key={idx} className="border-b border-gray-800/50 hover:bg-gray-800/30 transition-colors">
+                                    <td className="py-3 px-4 font-medium text-white">{model.name}</td>
+                                    <td className="py-3 px-4">
+                                        <span className={`inline-flex items-center px-2 py-1 rounded text-xs font-medium 
+                                            ${model.provider === 'OpenAI' ? 'bg-green-500/10 text-green-400' :
+                                                model.provider === 'Google AI' ? 'bg-indigo-500/10 text-indigo-400' : 'bg-amber-500/10 text-amber-400'}`}>
+                                            {model.provider}
+                                        </span>
+                                    </td>
+                                    <td className="py-3 px-4 text-right">{Math.floor(model.tokens / 500).toLocaleString()}</td>
+                                    <td className="py-3 px-4 text-right">~500</td>
+                                    <td className="py-3 px-4 text-right font-medium text-white">${model.cost.toFixed(2)}</td>
                                 </tr>
                             ))}
                         </tbody>
-                        <tfoot>
-                            <tr className="bg-gray-800/30">
-                                <td className="py-4 px-4 text-white font-bold">합계</td>
-                                <td className="py-4 px-4 text-right text-white font-bold">2.1M</td>
-                                <td className="py-4 px-4 text-right text-white font-bold">1.07M</td>
-                                <td className="py-4 px-4 text-right text-white font-bold">3.17M</td>
-                                <td className="py-4 px-4 text-right text-green-400 font-bold">$24.20</td>
-                            </tr>
-                        </tfoot>
                     </table>
                 </div>
             </div>

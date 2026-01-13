@@ -2,15 +2,7 @@
 
 import { useState } from 'react';
 import { Plus, Trash2, RefreshCw, Eye, EyeOff, CheckCircle2, XCircle, AlertCircle } from 'lucide-react';
-
-interface ApiKey {
-    id: string;
-    provider: 'openai' | 'anthropic' | 'google' | 'mistral' | 'cohere';
-    name: string;
-    maskedKey: string;
-    status: 'connected' | 'error' | 'pending';
-    lastChecked: string;
-}
+import { useAppContext, ApiKey } from '@/context/AppContext';
 
 const providerInfo = {
     openai: { name: 'OpenAI', color: '#22c55e', bgColor: 'bg-green-500/10', borderColor: 'border-green-500/30' },
@@ -20,8 +12,6 @@ const providerInfo = {
     cohere: { name: 'Cohere', color: '#06b6d4', bgColor: 'bg-cyan-500/10', borderColor: 'border-cyan-500/30' },
 };
 
-const mockKeys: ApiKey[] = [];
-
 interface ApiKeyCardProps {
     apiKey: ApiKey;
     onDelete: (id: string) => void;
@@ -30,7 +20,7 @@ interface ApiKeyCardProps {
 
 function ApiKeyCard({ apiKey, onDelete, onTest }: ApiKeyCardProps) {
     const [showKey, setShowKey] = useState(false);
-    const provider = providerInfo[apiKey.provider];
+    const provider = providerInfo[apiKey.provider] || providerInfo.openai;
 
     const getStatusIcon = () => {
         switch (apiKey.status) {
@@ -80,14 +70,9 @@ function ApiKeyCard({ apiKey, onDelete, onTest }: ApiKeyCardProps) {
             <div className="mb-4">
                 <div className="flex items-center gap-2 bg-gray-800/50 rounded-lg px-4 py-3">
                     <code className="flex-1 text-sm text-gray-300 font-mono">
-                        {showKey ? 'sk-proj-abcdefg1234567890...' : apiKey.maskedKey}
+                        {showKey ? apiKey.maskedKey.replace(/\*/g, '•') : apiKey.maskedKey}
                     </code>
-                    <button
-                        onClick={() => setShowKey(!showKey)}
-                        className="text-gray-400 hover:text-white transition-colors"
-                    >
-                        {showKey ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                    </button>
+                    {/* Note: In a real app we'd need the real key to show it, but here we only have maskedKey in context for security */}
                 </div>
                 <p className="text-xs text-gray-500 mt-2">마지막 확인: {apiKey.lastChecked}</p>
             </div>
@@ -185,40 +170,22 @@ function AddKeyModal({ isOpen, onClose, onAdd }: AddKeyModalProps) {
 }
 
 export default function KeysPage() {
-    const [keys, setKeys] = useState<ApiKey[]>(mockKeys);
+    const { apiKeys, addKey, deleteKey, resetKeys } = useAppContext();
     const [isModalOpen, setIsModalOpen] = useState(false);
 
     const handleDelete = (id: string) => {
         if (confirm('정말로 이 API 키를 삭제하시겠습니까?')) {
-            setKeys(keys.filter(key => key.id !== id));
+            deleteKey(id);
         }
     };
 
     const handleTest = (id: string) => {
-        // Demo: 실제 백엔드 연동 전까지는 무조건 성공으로 처리
-        setKeys(keys.map(key =>
-            key.id === id
-                ? { ...key, status: 'connected', lastChecked: '방금 전' }
-                : key
-        ));
         alert('연결 테스트 성공! (데모 모드)');
-    };
-
-    const handleAdd = (provider: string, apiKey: string, name: string) => {
-        const newKey: ApiKey = {
-            id: Date.now().toString(),
-            provider: provider as ApiKey['provider'],
-            name: name || 'New Key',
-            maskedKey: `${apiKey.slice(0, 7)}****${apiKey.slice(-4)}`,
-            status: 'connected',
-            lastChecked: '방금 전',
-        };
-        setKeys([...keys, newKey]);
     };
 
     const handleResetAll = () => {
         if (confirm('⚠️ 모든 API 키와 사용량 데이터가 삭제됩니다. 계속하시겠습니까?')) {
-            setKeys([]);
+            resetKeys();
         }
     };
 
@@ -242,9 +209,9 @@ export default function KeysPage() {
             </div>
 
             {/* Keys Grid */}
-            {keys.length > 0 ? (
+            {apiKeys.length > 0 ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {keys.map((key) => (
+                    {apiKeys.map((key) => (
                         <ApiKeyCard
                             key={key.id}
                             apiKey={key}
@@ -270,7 +237,7 @@ export default function KeysPage() {
             <AddKeyModal
                 isOpen={isModalOpen}
                 onClose={() => setIsModalOpen(false)}
-                onAdd={handleAdd}
+                onAdd={addKey}
             />
         </div>
     );

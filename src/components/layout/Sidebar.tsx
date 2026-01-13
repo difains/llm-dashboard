@@ -10,6 +10,7 @@ import {
     Settings,
     Zap
 } from 'lucide-react';
+import { useAppContext } from '@/context/AppContext';
 
 const navItems = [
     { href: '/', label: '대시보드', icon: LayoutDashboard },
@@ -21,9 +22,10 @@ const navItems = [
 
 export function Sidebar() {
     const pathname = usePathname();
+    const { apiKeys } = useAppContext();
 
     return (
-        <aside className="fixed left-0 top-0 h-screen w-64 bg-gray-900 border-r border-gray-800 flex flex-col">
+        <aside className="fixed left-0 top-0 h-screen w-64 bg-gray-900 border-r border-gray-800 flex flex-col z-20">
             {/* Logo */}
             <div className="p-6 border-b border-gray-800">
                 <Link href="/" className="flex items-center gap-3">
@@ -49,8 +51,8 @@ export function Sidebar() {
                                 <Link
                                     href={item.href}
                                     className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 ${isActive
-                                            ? 'bg-gradient-to-r from-indigo-500/20 to-purple-500/20 text-indigo-400 border border-indigo-500/30'
-                                            : 'text-gray-400 hover:bg-gray-800 hover:text-white'
+                                        ? 'bg-gradient-to-r from-indigo-500/20 to-purple-500/20 text-indigo-400 border border-indigo-500/30'
+                                        : 'text-gray-400 hover:bg-gray-800 hover:text-white'
                                         }`}
                                 >
                                     <Icon className="w-5 h-5" />
@@ -66,7 +68,7 @@ export function Sidebar() {
             <div className="p-4 border-t border-gray-800">
                 <div className="card-gradient text-center py-4">
                     <p className="text-xs text-gray-400 mb-2">현재 사용 중</p>
-                    <p className="text-lg font-bold text-white">3개 API 연결</p>
+                    <p className="text-lg font-bold text-white">{apiKeys.length}개 API 연결</p>
                 </div>
             </div>
         </aside>

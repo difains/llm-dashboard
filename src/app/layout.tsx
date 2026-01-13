@@ -13,6 +13,10 @@ export const metadata: Metadata = {
   description: "LLM 사용량 통합 모니터링 대시보드",
 };
 
+import { AppContextProvider } from "@/context/AppContext";
+
+// ...
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -21,12 +25,14 @@ export default function RootLayout({
   return (
     <html lang="ko">
       <body className={`${inter.variable} antialiased bg-gray-950 text-white`}>
-        <div className="flex min-h-screen">
-          <Sidebar />
-          <main className="flex-1 p-8" style={{ marginLeft: '256px' }}>
-            {children}
-          </main>
-        </div>
+        <AppContextProvider>
+          <div className="flex min-h-screen">
+            <Sidebar />
+            <main className="flex-1 p-8" style={{ marginLeft: '256px' }}>
+              {children}
+            </main>
+          </div>
+        </AppContextProvider>
       </body>
     </html>
   );
