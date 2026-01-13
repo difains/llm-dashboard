@@ -41,6 +41,7 @@ export default function Dashboard() {
           title="활성 API 키"
           value="3 / 5"
           icon={<Key className="w-6 h-6 text-green-400" />}
+          href="/keys"
         />
       </div>
 

@@ -23,7 +23,7 @@ export default function RootLayout({
       <body className={`${inter.variable} antialiased bg-gray-950 text-white`}>
         <div className="flex min-h-screen">
           <Sidebar />
-          <main className="flex-1 ml-64 p-8">
+          <main className="flex-1 p-8" style={{ marginLeft: '256px' }}>
             {children}
           </main>
         </div>

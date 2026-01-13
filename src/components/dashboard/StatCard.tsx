@@ -1,6 +1,7 @@
 'use client';
 
 import { TrendingUp, TrendingDown, Minus } from 'lucide-react';
+import Link from 'next/link';
 import { ReactNode } from 'react';
 
 interface StatCardProps {
@@ -10,9 +11,10 @@ interface StatCardProps {
     changeLabel?: string;
     icon: ReactNode;
     gradient?: boolean;
+    href?: string;
 }
 
-export function StatCard({ title, value, change, changeLabel, icon, gradient }: StatCardProps) {
+export function StatCard({ title, value, change, changeLabel, icon, gradient, href }: StatCardProps) {
     const getTrendIcon = () => {
         if (change === undefined) return null;
         if (change > 0) return <TrendingUp className="w-4 h-4" />;
@@ -27,8 +29,8 @@ export function StatCard({ title, value, change, changeLabel, icon, gradient }: 
         return 'text-gray-400';
     };
 
-    return (
-        <div className={`${gradient ? 'card-gradient' : 'card'} group hover:border-indigo-500/50 transition-all duration-300`}>
+    const Content = (
+        <div className={`${gradient ? 'card-gradient' : 'card'} group hover:border-indigo-500/50 transition-all duration-300 h-full`}>
             <div className="flex items-start justify-between mb-4">
                 <div className="p-3 rounded-xl bg-gradient-to-br from-indigo-500/20 to-purple-500/20 border border-indigo-500/20 group-hover:scale-110 transition-transform duration-300">
                     {icon}
@@ -38,6 +40,9 @@ export function StatCard({ title, value, change, changeLabel, icon, gradient }: 
                         {getTrendIcon()}
                         <span className="text-sm font-medium">{Math.abs(change)}%</span>
                     </div>
+                )}
+                {href && !change && (
+                    <span className="text-xs text-indigo-400 font-medium group-hover:underline">관리 &rarr;</span>
                 )}
             </div>
             <div>
@@ -49,4 +54,14 @@ export function StatCard({ title, value, change, changeLabel, icon, gradient }: 
             </div>
         </div>
     );
+
+    if (href) {
+        return (
+            <Link href={href} className="block h-full">
+                {Content}
+            </Link>
+        );
+    }
+
+    return Content;
 }
