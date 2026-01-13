@@ -62,7 +62,7 @@ export function AppContextProvider({ children }: { children: ReactNode }) {
     }, [apiKeys, isLoading]);
 
     const addKey = (provider: string, keyString: string, name: string) => {
-        // Simple Validation Simulation
+        // Simple Validation
         let isValid = keyString.length > 5;
         if (provider === 'google' && !keyString.startsWith('AIza')) isValid = false;
         if (provider === 'openai' && !keyString.startsWith('sk-')) isValid = false;
@@ -90,99 +90,16 @@ export function AppContextProvider({ children }: { children: ReactNode }) {
     };
 
     // --- Data Generation Logic ---
-    // Generate mock data based on connected providers
+    // 실제 데이터 연동 전이므로 기본값(0) 반환
     const getDashboardData = (): DashboardData => {
-        if (apiKeys.length === 0) {
-            return {
-                totalRequests: '-',
-                totalTokens: '-',
-                estimatedCost: '-',
-                keyCount: '0 / 5',
-                usageHistory: [],
-                providerDistribution: [],
-                modelUsage: [],
-            };
-        }
-
-        const providers = new Set(apiKeys.map(k => k.provider));
-        let totalReq = 0;
-        let totalTok = 0;
-        let totalCost = 0;
-
-        // Base stats per provider (Simulation)
-        // If Google is connected, add Gemini stats
-        // If OpenAI is connected, add GPT stats
-
-        const history: { [date: string]: { tokens: number; cost: number } } = {};
-        const models: { name: string; tokens: number; cost: number; provider: string }[] = [];
-        const dist: { [provider: string]: number } = {};
-
-        // Helper to add data
-        const addData = (provider: string, modelName: string, reqs: number, toks: number, cost: number) => {
-            totalReq += reqs;
-            totalTok += toks;
-            totalCost += cost;
-
-            // Model usage
-            models.push({ name: modelName, tokens: toks, cost, provider });
-
-            // Distribution
-            dist[provider] = (dist[provider] || 0) + reqs;
-
-            // History (randomize over last 7 days)
-            for (let i = 6; i >= 0; i--) {
-                const day = new Date();
-                day.setDate(day.getDate() - i);
-                const dateStr = day.toLocaleDateString('ko-KR', { month: 'short', day: 'numeric' });
-
-                if (!history[dateStr]) history[dateStr] = { tokens: 0, cost: 0 };
-                // Random daily fluctuation
-                history[dateStr].tokens += toks / 7 * (0.8 + Math.random() * 0.4);
-                history[dateStr].cost += cost / 7 * (0.8 + Math.random() * 0.4);
-            }
-        };
-
-        if (providers.has('google')) {
-            addData('Google AI', 'Gemini Pro', 5400, 1500000, 12.5); // Cheap
-        }
-        if (providers.has('openai')) {
-            addData('OpenAI', 'GPT-4 Turbo', 1200, 800000, 45.0); // Expensive
-            addData('OpenAI', 'GPT-3.5 Turbo', 8000, 2000000, 3.0);
-        }
-        if (providers.has('anthropic')) {
-            addData('Anthropic', 'Claude 3 Opus', 500, 600000, 35.0);
-            addData('Anthropic', 'Claude 3 Haiku', 3000, 1200000, 5.0);
-        }
-
-        // Others...
-
-        // Format Data
-        const usageHistory = Object.entries(history).map(([name, val]) => ({
-            name,
-            tokens: Math.round(val.tokens),
-            cost: Number(val.cost.toFixed(2))
-        }));
-
-        const providerDistribution = Object.entries(dist).map(([name, val]) => {
-            let color = '#94a3b8';
-            if (name.includes('Google')) color = '#6366f1'; // Indigo
-            if (name.includes('OpenAI')) color = '#22c55e'; // Green
-            if (name.includes('Anthropic')) color = '#f59e0b'; // Amber
-            return { name, value: val, color };
-        });
-
-        // Format Numbers
-        const formatNum = (n: number) => n.toLocaleString();
-        const formatTok = (n: number) => n > 1000000 ? `${(n / 1000000).toFixed(2)}M` : `${(n / 1000).toFixed(0)}K`;
-
         return {
-            totalRequests: formatNum(totalReq),
-            totalTokens: formatTok(totalTok),
-            estimatedCost: `$${totalCost.toFixed(2)}`,
+            totalRequests: '0',
+            totalTokens: '0',
+            estimatedCost: '$0.00',
             keyCount: `${apiKeys.length} / 5`,
-            usageHistory,
-            providerDistribution,
-            modelUsage: models,
+            usageHistory: [],
+            providerDistribution: [],
+            modelUsage: [],
         };
     };
 
