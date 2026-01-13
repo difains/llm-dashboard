@@ -20,11 +20,7 @@ const providerInfo = {
     cohere: { name: 'Cohere', color: '#06b6d4', bgColor: 'bg-cyan-500/10', borderColor: 'border-cyan-500/30' },
 };
 
-const mockKeys: ApiKey[] = [
-    { id: '1', provider: 'openai', name: 'Production Key', maskedKey: 'sk-****************************7x2n', status: 'connected', lastChecked: '2분 전' },
-    { id: '2', provider: 'anthropic', name: 'Claude API', maskedKey: 'sk-ant-**********************3kf8', status: 'connected', lastChecked: '5분 전' },
-    { id: '3', provider: 'google', name: 'Gemini Key', maskedKey: 'AIza****************************Xk9', status: 'error', lastChecked: '1시간 전' },
-];
+const mockKeys: ApiKey[] = [];
 
 interface ApiKeyCardProps {
     apiKey: ApiKey;
@@ -199,8 +195,13 @@ export default function KeysPage() {
     };
 
     const handleTest = (id: string) => {
-        // TODO: Implement actual connection test
-        alert('연결 테스트 중...');
+        // Demo: 실제 백엔드 연동 전까지는 무조건 성공으로 처리
+        setKeys(keys.map(key =>
+            key.id === id
+                ? { ...key, status: 'connected', lastChecked: '방금 전' }
+                : key
+        ));
+        alert('연결 테스트 성공! (데모 모드)');
     };
 
     const handleAdd = (provider: string, apiKey: string, name: string) => {
@@ -209,7 +210,7 @@ export default function KeysPage() {
             provider: provider as ApiKey['provider'],
             name: name || 'New Key',
             maskedKey: `${apiKey.slice(0, 7)}****${apiKey.slice(-4)}`,
-            status: 'pending',
+            status: 'connected',
             lastChecked: '방금 전',
         };
         setKeys([...keys, newKey]);
