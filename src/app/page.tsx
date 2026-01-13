@@ -32,9 +32,6 @@ export default function Dashboard() {
     );
   }
 
-  // Parse values for trend calculation (simulated)
-  // In a real app, we would calculate this based on historical data
-
   return (
     <div className="space-y-8 animate-fade-in">
       {/* Header */}
@@ -61,7 +58,7 @@ export default function Dashboard() {
           icon={<Database className="w-6 h-6 text-purple-400" />}
         />
         <StatCard
-          title="예상 비용"
+          title="예상 비용 (Demo)"
           value={dashboardData.estimatedCost}
           change={-5}
           changeLabel="전일 대비"
